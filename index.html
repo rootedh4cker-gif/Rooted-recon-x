@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🌐 Live Recon Tool</title>
+  <style>
+    body {
+      background:#0d1117;
+      color:#00ff88;
+      font-family:monospace;
+      padding:20px;
+    }
+    h2 { color:#00ffa2; }
+    #output {
+      margin-top:20px;
+    }
+    .section {
+      background:#111;
+      padding:15px;
+      border-radius:8px;
+      margin-bottom:15px;
+    }
+    .title {
+      color:#00ffa2;
+      font-weight:bold;
+      margin-bottom:5px;
+    }
+    input,button {
+      padding:10px;
+      margin:5px;
+      border:none;
+      border-radius:5px;
+      font-family:monospace;
+    }
+    button {
+      background:#00ff88;
+      color:#000;
+      cursor:pointer;
+      font-weight:bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>🌐 Live Recon Tool</h2>
+  <input id="target" type="text" placeholder="example.com">
+  <button onclick="recon()">Start Recon</button>
+  <div id="output"></div>
+
+<script>
+async function recon(){
+  let domain = document.getElementById("target").value.trim();
+  let out = document.getElementById("output");
+  out.innerHTML = "";
+
+  if(!domain){ 
+    out.innerHTML = "<div class='section'>❌ Please enter a domain</div>"; 
+    return; 
+  }
+
+  out.innerHTML = `<div class='section'>[*] Starting Recon on: <b>${domain}</b></div>`;
+
+  try {
+    // 🔹 IP Info
+    let ipRes = await fetch(`https://ipapi.co/${domain}/json/`);
+    let ipData = await ipRes.json();
+    out.innerHTML += `<div class='section'><div class='title'>📍 IP Info</div><pre>${JSON.stringify(ipData, null, 2)}</pre></div>`;
+
+    // 🔹 DNS Lookup
+    let dnsRes = await fetch(`https://dns.google/resolve?name=${domain}`);
+    let dnsData = await dnsRes.json();
+    out.innerHTML += `<div class='section'><div class='title'>🔎 DNS Records</div><pre>${JSON.stringify(dnsData, null, 2)}</pre></div>`;
+
+    // 🔹 HTTP Headers (via AllOrigins)
+    let hdrRes = await fetch(`https://api.allorigins.win/raw?url=http://${domain}`);
+    let hdrTxt = await hdrRes.text();
+    let preview = hdrTxt.split("\n").slice(0,20).join("\n");
+    out.innerHTML += `<div class='section'><div class='title'>📑 HTTP Response (First 20 lines)</div><pre>${preview}</pre></div>`;
+
+    out.innerHTML += `<div class='section'>✅ Recon Completed!</div>`;
+  } catch (err) {
+    out.innerHTML += `<div class='section'>❌ Error: ${err}</div>`;
+  }
+}
+</script>
+</body>
+</html>
