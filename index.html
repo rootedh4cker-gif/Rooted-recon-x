@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>arbab-recon-x</title>
+  <style>
+    body { background:#0d1117; color:#00ff88; font-family:monospace; padding:20px; }
+    h1 { color:#00ffa2; text-align:center; }
+    h2 { color:#00ffa2; }
+    a { color:#00ffa2; text-decoration:none; font-weight:bold; }
+    #output { margin-top:20px; }
+    .section { background:#111; padding:15px; border-radius:8px; margin-bottom:15px; }
+    .title { color:#00ffa2; font-weight:bold; margin-bottom:5px; }
+    input,button { padding:10px; margin:5px; border:none; border-radius:5px; font-family:monospace; }
+    button { background:#00ff88; color:#000; cursor:pointer; font-weight:bold; }
+    footer { margin-top:30px; padding:15px; background:#111; border-radius:8px; text-align:center; font-size:14px; color:#999; }
+  </style>
+</head>
+<body>
+  <h1>🔥 ARBAB-RECON-X 🔥</h1>
+  <p style="text-align:center;">
+    Join our channel 👉 <a href="https://whatsapp.com/channel/0029Vb3sqQ4A89Mfr4nu351Y" target="_blank">WhatsApp Channel</a>
+  </p>
+
+  <div class="section">
+    <div class="title">📖 About this Tool</div>
+    <p>
+      ARBAB-RECON-X ek <b>live recon tool</b> hai jo domain par 
+      <b>Domain Info, DNS, WHOIS, GeoIP aur HTTP Response</b> fetch karta hai.
+    </p>
+  </div>
+
+  <h2>🌐 Live Recon</h2>
+  <input id="target" type="text" placeholder="example.com">
+  <button onclick="recon()">Start Recon</button>
+  <div id="output"></div>
+
+  <footer>
+    ⚠️ <b>Disclaimer:</b> Yeh tool sirf <b>educational aur ethical use</b> ke liye hai.
+  </footer>
+
+<script>
+async function recon(){
+  let domain = document.getElementById("target").value.trim();
+  let out = document.getElementById("output");
+  out.innerHTML = "";
+
+  if(!domain){ 
+    out.innerHTML = "<div class='section'>❌ Please enter a domain</div>"; 
+    return; 
+  }
+
+  out.innerHTML = `<div class='section'>[*] Starting Recon on: <b>${domain}</b></div>`;
+
+  try {
+    // ✅ Domain WHOIS Lookup
+    let whoisRes = await fetch(`https://api.api-ninjas.com/v1/whois?domain=${domain}`, {
+      headers: { "X-Api-Key": "demo_key_here" }  // 🔹 apna API key dalna hoga
+    });
+    let whoisData = await whoisRes.json();
+    out.innerHTML += `<div class='section'><div class='title'>📜 WHOIS Lookup</div><pre>${JSON.stringify(whoisData, null, 2)}</pre></div>`;
+
+    // ✅ DNS Lookup
+    let dnsRes = await fetch(`https://dns.google/resolve?name=${domain}`);
+    let dnsData = await dnsRes.json();
+    out.innerHTML += `<div class='section'><div class='title'>🔎 DNS Records</div><pre>${JSON.stringify(dnsData, null, 2)}</pre></div>`;
+
+    // ✅ IP Info / Geolocation
+    let ipRes = await fetch(`https://ipapi.co/${domain}/json/`);
+    let ipData = await ipRes.json();
+    out.innerHTML += `<div class='section'><div class='title'>📍 IP Info</div><pre>${JSON.stringify(ipData, null, 2)}</pre></div>`;
+
+    // ✅ Reverse DNS
+    let revDns = await fetch(`https://dns.google/resolve?name=${ipData.ip}&type=PTR`);
+    let revData = await revDns.json();
+    out.innerHTML += `<div class='section'><div class='title'>🔄 Reverse DNS</div><pre>${JSON.stringify(revData, null, 2)}</pre></div>`;
+
+    // ✅ HTTP Headers Detection
+    let hdrRes = await fetch(`https://api.allorigins.win/raw?url=http://${domain}`);
+    let hdrTxt = await hdrRes.text();
+    let preview = hdrTxt.split("\n").slice(0,20).join("\n");
+    out.innerHTML += `<div class='section'><div class='title'>📑 HTTP Response</div><pre>${preview}</pre></div>`;
+
+    out.innerHTML += `<div class='section'>✅ Recon Completed!</div>`;
+  } catch (err) {
+    out.innerHTML += `<div class='section'>❌ Error: ${err}</div>`;
+  }
+}
+</script>
+</body>
+</html>
